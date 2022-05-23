@@ -1,2 +1,2 @@
-# Smart-FlowerPot
-Embeded System Term Project "Smart FlowerPot"
+# Smart-Flower-Pot
+Embeded System Term Project "Smart Flower Pot"
