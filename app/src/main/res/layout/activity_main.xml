@@ -20,9 +20,9 @@
 
     <ImageView
         android:id="@+id/main_logo"
-        android:layout_width="285dp"
+        android:layout_width="220dp"
         android:layout_height="0dp"
-        android:layout_weight="4"
+        android:layout_weight="3"
         android:text="LOGO"
         android:background="@drawable/logo"
         android:layout_gravity="center"/>
@@ -31,7 +31,7 @@
         android:id="@+id/main_text"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="4"
+        android:layout_weight="5"
         android:text="설명설명설명"
         android:layout_marginTop="20dp"
         android:layout_marginBottom="20dp"
@@ -42,14 +42,9 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="@drawable/border_round"
+        android:background="@drawable/button_effect"
         android:text="Go to CAMERA"
         android:fontFamily="@font/font"
         android:textSize="17dp" />
-
-    <Button
-        android:id="@+id/test"
-        android:layout_width="30dp"
-        android:layout_height="30dp" />
 
 </LinearLayout>

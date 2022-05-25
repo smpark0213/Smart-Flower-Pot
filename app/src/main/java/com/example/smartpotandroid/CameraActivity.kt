@@ -1,6 +1,7 @@
 package com.example.smartpotandroid
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.smartpotandroid.databinding.ActivityCameraBinding
@@ -11,7 +12,8 @@ class CameraActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_camera)
+
+        binding = ActivityCameraBinding.inflate(layoutInflater)
 
         binding.cameraBackBtn.setOnClickListener {
             Toast.makeText(this, "back", Toast.LENGTH_SHORT).show()
@@ -20,6 +22,10 @@ class CameraActivity : AppCompatActivity() {
 
         binding.moveLeftBtn.setOnClickListener {
             Toast.makeText(this, "moveLeft", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.waterBtn.setOnClickListener {
+            Toast.makeText(this, "water", Toast.LENGTH_SHORT).show()
         }
 
         binding.moveRightBtn.setOnClickListener {
@@ -37,5 +43,7 @@ class CameraActivity : AppCompatActivity() {
         binding.movePot3Btn.setOnClickListener {
             Toast.makeText(this, "movePot3", Toast.LENGTH_SHORT).show()
         }
+
+        setContentView(binding.root)
     }
 }
