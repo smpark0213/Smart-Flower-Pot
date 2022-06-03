@@ -13,14 +13,15 @@
 #define TOPIC_NAME "flowerpot1"
 
 // Wi-Fi Connection Infomation
-const char* ssid = "Aftermoon";
+const char* ssid = "GC_free_WiFi";
 const char* pwd = "";
 WiFiClient espClient;
+unsigned long lastWiFiCheck = 0;
 
 // Mqtt
-const char* mqttServer = "192.168.0.0";
+const char* mqttServer = "172.16.239.43";
 const int mqttPort = 1883;
-const char* mqttClientName = "SmartFlowerpot";
+const char* mqttClientName = "SmartFlowerpot1";
 unsigned long lastSendTime = 0;
 char msg[MSG_BUFFER_SIZE];
 PubSubClient mqttClient(espClient);
@@ -57,7 +58,7 @@ void setup() {
 void loop() {
   // Wi-Fi Retry
   if(WiFi.status() != WL_CONNECTED) {
-    Serial.println("[Wi-Fi] Wi-Fi Disconnected! Reconnecting...");
+    Serial.println("[Wi-Fi] Disconnected!");
     Wifi_connect();
   }
 
@@ -65,15 +66,18 @@ void loop() {
   if(!mqttClient.connected()) {
     mqtt_reconnect();
   }
+
+  mqtt_publish();
 }
 
 /** Wi-Fi **/
 void Wifi_connect() {
     Serial.print("[Wi-Fi] Connected to ");
     Serial.print(ssid);
-    
+
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, pwd);
+    WiFi.setSleepMode(WIFI_NONE_SLEEP);
     while (WiFi.status() != WL_CONNECTED) {
       delay(500);
       Serial.print(".");
@@ -102,12 +106,12 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
 }
 
 void mqtt_reconnect() {
-  Serial.print("Connect to MQTT Server");
+  Serial.print("[MQTT] Connect to ");
+  Serial.print(mqttServer);
   while(!mqttClient.connected()) {
     if (mqttClient.connect(mqttClientName)) {
       Serial.println();
-      Serial.println("Connected!");
-      mqttClient.publish(TOPIC_NAME, "init");
+      Serial.println("[MQTT] Connected!");
     }
     else {
       Serial.print(".");
@@ -118,20 +122,22 @@ void mqtt_reconnect() {
 
 void mqtt_publish() {
   mqttClient.loop();
- 
-  // Light
-  lightValue = lightMeter.readLightLevel();
-  
-  // Moisture
-  // 0 ~ 300 Dry / 300 ~ 700 Humid / 700~950 In Water
-  moistureValue = analogRead(moisturePin);
   
   unsigned long now = millis();
-  if (now - lastSendTime > PUBLISH_INTERVAL) {
+  if (lastSendTime = 0 || now - lastSendTime > PUBLISH_INTERVAL) {
     lastSendTime = now;
-    snprintf(msg, MSG_BUFFER_SIZE, "Moisture #%ld / Light #%ld", moistureValue, lightValue);
-    Serial.print("Publish Message : ");
+    
+    // Light
+    lightValue = lightMeter.readLightLevel();
+    
+    // Moisture
+    // 0 ~ 300 Dry / 300 ~ 700 Humid / 700~950 In Water
+    moistureValue = analogRead(moisturePin);
+    
+    snprintf(msg, MSG_BUFFER_SIZE, "Moisture %ld / Light %f", moistureValue, lightValue);
+    Serial.print("[MQTT] Publish Message : ");
     Serial.println(msg);
     mqttClient.publish(TOPIC_NAME, msg);
   }
+  delay(500);
 }
