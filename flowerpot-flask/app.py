@@ -9,6 +9,7 @@ from flask_mqtt import Mqtt
 from gpiozero import Motor
 from flask_socketio import SocketIO
 
+eventlet.monkey_patch()
 broker_ip = '127.0.0.1'
 mqtt_port = 1883
 app = Flask(__name__)
