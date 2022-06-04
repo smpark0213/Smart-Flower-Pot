@@ -30,6 +30,7 @@ mqtt = Mqtt(app)
 topic = ['flowerpot1', 'flowerpot2', 'flowerpot3']
 flowerpot_data = [{'name': 'flowerpot1', 'moisture' : -1, 'light' : -1}, {'name':'flowerpot2', 'moisture' : -1, 'light' : -1}, {'name':'flowerpot3', 'moisture' : -1, 'light' : -1}]
 queueList = []
+errorDict = {'isError': False}
 
 ### OCR ###
 cap = cv2.VideoCapture(-1)
@@ -119,7 +120,9 @@ def update_flower_pots(inputTopic, moisture, light):
 
 
 def check_flowerpot():
-    
+    # moisture validation
+    # light validation
+    return 0;
 
 def run_snesor(queue, errorDict):
     motor1 = Motor(forward=17, backward=27)
@@ -129,7 +132,6 @@ def run_snesor(queue, errorDict):
 
     try : 
         while True:
-            print('In sensor')
             if queue:
                 # 일반 명령어 파싱
                 cmd = list(map(int, queue.pop(0).split(';')))
@@ -172,61 +174,6 @@ def run_snesor(queue, errorDict):
         print('Error!', e)
 
 
-def run_flask(queue, errorDict):
-    # flowerpot들의 센서 정보
-    @app.route('/flowerpot')
-    def get_flowerpot1():
-        if not errorDict['isError']:
-            global flowerpot_data
-            return jsonify(
-                code=200, success=True,
-                msg = flowerpot_data
-            )
-        else:
-            return jsonify(
-                code=500,
-                success=False,
-                msg='Mqtt Connection Error'
-            )
-
-    # 전진
-    @app.route('/forward')
-    def move_forward():
-        if not errorDict['isError']:
-            queue.append('1;0')
-            return jsonify(
-                code=200,
-                success=True,
-                msg='OK'
-            )
-        else:
-            return jsonify(
-                code=500,
-                success=False,
-                msg='Sensor Connection Error'
-            )
-
-    # 후진
-    @app.route('/backward')
-    def move_backward():
-        if not errorDict['isError']:
-            queue.append('2;0')
-            return jsonify(
-                code=200,
-                success=True,
-                msg='OK'
-            )
-        else:
-            return jsonify(
-                code=500,
-                success=False,
-                msg='Sensor Connection Error'
-            )
-
-    # Flask-MQTT only supports running with one instance
-    socketio.run(app, host='0.0.0.0', port=5000, use_reloader=False, debug=False)
-
-
 if __name__ == '__main__':
     # important: Do not use reloader because this will create two Flask instances.
     print("Flower-Pot-Server Runing...")
@@ -235,10 +182,10 @@ if __name__ == '__main__':
     # manager = multiprocessing.Manager()
 
     # 명령 Queue
-    global queueList
+    queueList
 
     # Error Check용 Dict
-    errorDict = manager.dict({'isError': False})
+    errorDict
 
     run_snesor = threading.Thread(target=run_snesor, args=(queueList, errorDict))
     run_video = threading.Thread(target=run_video, args=(queueList, errorDict))
@@ -248,13 +195,3 @@ if __name__ == '__main__':
 
     run_video.join()
     run_snesor.join()
-
-    # # Sensor Process
-    # flask_process = Process(target=run_flask, args=(queueList, errorDict))
-    # sensor_process = Process(target=run_snesor, args=(queueList, errorDict))
-
-    # flask_process.start()
-    # sensor_process.start()
-
-    # flask_process.join()
-    # sensor_process.join()
