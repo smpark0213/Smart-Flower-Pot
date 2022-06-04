@@ -1,29 +1,80 @@
 from distutils.util import run_2to3
+import threading
 import multiprocessing
 import time
-import eventlet
 from multiprocessing import Process
 from multiprocessing.dummy import Process
 from flask import Flask, jsonify
 from flask_mqtt import Mqtt
 from gpiozero import Motor
 from flask_socketio import SocketIO
+import cv2
+from pytesseract import image_to_string
+import pytesseract
+from PIL import Image
 
-#eventlet.monkey_patch()
+# mqtt_server
+# camera_server
+# motor_server
+
 broker_ip = '127.0.0.1'
 mqtt_port = 1883
 app = Flask(__name__)
 
 app.config['MQTT_BROKER_URL'] = broker_ip
 app.config['MQTT_BROKER_PORT'] = mqtt_port
-# app.config['MQTT_USERNAME'] = 'user'
-# app.config['MQTT_PASSWORD'] = 'secret'
 app.config['MQTT_REFRESH_TIME'] = 1.0  # refresh time in seconds
 socketio = SocketIO(app)
 mqtt = Mqtt(app)
 
 topic = ['flowerpot1', 'flowerpot2', 'flowerpot3']
-flowerpot_data = [{'flowerpot1': {}}, {'flowerpot2': {}}, {'flowerpot3': {}}]
+flowerpot_data = [{'name': 'flowerpot1', 'moisture' : -1, 'light' : -1}, {'name':'flowerpot2', 'moisture' : -1, 'light' : -1}, {'name':'flowerpot3', 'moisture' : -1, 'light' : -1}]
+queueList = []
+
+### OCR ###
+cap = cv2.VideoCapture(-1)
+
+def video_detector():
+    if cap.isOpened():
+        while True:
+            ret, video = cap.read()
+            video = cv2.flip(video, 0)  # 좌우반전
+            video = cv2.flip(video, 1)  # 상하반전
+            if ret:
+                video = cv2.resize(video, dsize=(400, 300), interpolation=cv2.INTER_AREA)
+
+                gray = cv2.cvtColor(video, cv2.COLOR_BGR2GRAY)
+                gray = cv2.resize(gray, dsize=(400, 300), interpolation=cv2.INTER_AREA)
+
+                threshold = cv2.threshold(gray, 255, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+                img_result = cv2.resize(threshold, dsize=(400, 300), interpolation=cv2.INTER_AREA)
+
+                img_result = cv2.medianBlur(img_result, ksize=5)
+                text = image_to_string(img_result, lang='eng', config='--psm 1 -c preserve_interword_spaces=1') # Array
+                text = text.upper()
+                textArr = text.split('\n')
+                # print(textArr)
+
+                print("Text = " + str(textArr))
+
+                if cv2.waitKey(1) != -1:
+                    break
+            else:
+                print("no frame")
+                break
+    else:
+        print("can't open camera")
+
+
+def run_video(queue, errorDict):
+    try:
+        video_detector()
+
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+    except Exception as e:
+        errorDict['isError'] = True
+        print('Error!', e)
 
 ### flask-mqtt ###
 @mqtt.on_connect()
@@ -46,23 +97,29 @@ def handle_mqtt_message(client, userdata, message):
     update_flower_pots(message.topic, moisture, light)
 
 
+# flowerpot1 == 앞쪽
+# flowerpot2 == 뒤쪽
+
 def update_flower_pots(inputTopic, moisture, light):
     global flowerpot_data
     global topic
     print(inputTopic)
     if(inputTopic == topic[0]):
-        flowerpot_data[0][topic[0]]['moisture'] = moisture
-        flowerpot_data[0][topic[0]]['light'] = light
+        flowerpot_data[0]['moisture'] = moisture
+        flowerpot_data[0]['light'] = light
     elif(inputTopic == topic[1]):
-        flowerpot_data[1][topic[1]]['moisture'] = moisture
-        flowerpot_data[1][topic[1]]['light'] = light
+        flowerpot_data[1]['moisture'] = moisture
+        flowerpot_data[1]['light'] = light
     elif(inputTopic == topic[2]):
-        flowerpot_data[2][topic[2]]['moisture'] = moisture
-        flowerpot_data[2][topic[2]]['light'] = light
+        flowerpot_data[2]['moisture'] = moisture
+        flowerpot_data[2]['light'] = light
     else:
         return 0
     print(flowerpot_data)
 
+
+def check_flowerpot():
+    
 
 def run_snesor(queue, errorDict):
     motor1 = Motor(forward=17, backward=27)
@@ -72,6 +129,7 @@ def run_snesor(queue, errorDict):
 
     try : 
         while True:
+            print('In sensor')
             if queue:
                 # 일반 명령어 파싱
                 cmd = list(map(int, queue.pop(0).split(';')))
@@ -91,7 +149,7 @@ def run_snesor(queue, errorDict):
                         motor3.stop()
                         motor4.stop()
                         queue[:] = []
-                        continue
+                    
 
                 if cmd[0] == 2:
                     try:
@@ -107,7 +165,7 @@ def run_snesor(queue, errorDict):
                         motor3.stop()
                         motor4.stop()
                         queue[:] = []
-                        continue
+                    
     
     except Exception as e:
         errorDict['isError'] = True
@@ -172,21 +230,31 @@ def run_flask(queue, errorDict):
 if __name__ == '__main__':
     # important: Do not use reloader because this will create two Flask instances.
     print("Flower-Pot-Server Runing...")
-
-    #MultiProcessor간 변수 공유를 위한 Manager
-    manager = multiprocessing.Manager()
+    
+    # MultiProcessor간 변수 공유를 위한 Manager
+    # manager = multiprocessing.Manager()
 
     # 명령 Queue
-    queueList = manager.list()
+    global queueList
+
     # Error Check용 Dict
     errorDict = manager.dict({'isError': False})
 
-    # Sensor Process
-    flask_process = Process(target=run_flask, args=(queueList, errorDict))
-    sensor_process = Process(target=run_snesor, args=(queueList, errorDict))
+    run_snesor = threading.Thread(target=run_snesor, args=(queueList, errorDict))
+    run_video = threading.Thread(target=run_video, args=(queueList, errorDict))
 
-    flask_process.start()
-    sensor_process.start()
+    run_video.start()
+    run_snesor.start()
 
-    flask_process.join()
-    sensor_process.join()
+    run_video.join()
+    run_snesor.join()
+
+    # # Sensor Process
+    # flask_process = Process(target=run_flask, args=(queueList, errorDict))
+    # sensor_process = Process(target=run_snesor, args=(queueList, errorDict))
+
+    # flask_process.start()
+    # sensor_process.start()
+
+    # flask_process.join()
+    # sensor_process.join()
