@@ -31,9 +31,31 @@ topic = ['flowerpot1', 'flowerpot2', 'flowerpot3']
 flowerpot_data = [{'name': 'flowerpot1', 'moisture' : -1, 'light' : -1}, {'name':'flowerpot2', 'moisture' : -1, 'light' : -1}, {'name':'flowerpot3', 'moisture' : -1, 'light' : -1}]
 queueList = []
 errorDict = {'isError': False}
+# 현재 화분
+curr_plant = None
 
 ### OCR ###
 cap = cv2.VideoCapture(-1)
+
+# 앞 화분 (flowerpot1)
+def is_plant1(text):
+    plant1 = 'plantA'
+    input_char = text
+    if(plant1 in input_char):
+        return 1
+    else:
+        return 0
+
+
+# 뒤 화분(flowerpot2)
+def is_plant2(text):
+    plant1 = 'plantA'
+    input_char = text
+    if(plant1 in input_char):
+        return 1
+    else:
+        return 0
+    
 
 def video_detector():
     if cap.isOpened():
@@ -122,14 +144,28 @@ def update_flower_pots(inputTopic, moisture, light):
 def check_flowerpot():
     # moisture validation
     # light validation
-    return 0;
+    return 0
+
+
+def motor5():
+    # 워터펌프 : motor5
+    motor5 = Motor(forward=26, backward=21)
+    motor5.forward(1)
+    time.sleep(2.5)
+    motor5.stop()
 
 def run_snesor(queue, errorDict):
+    # 바퀴 : motor1 ~ motor4
     motor1 = Motor(forward=17, backward=27)
     motor2 = Motor(forward=22, backward=23)
     motor3 = Motor(forward=5, backward=6)
     motor4 = Motor(forward=13, backward=19)
 
+    # # 워터펌프 : motor5
+    # motor5 = Motor(forward=26)
+    # motor5.forward(0.5)
+    # time.sleep(5)
+    # motor5.stop()
     try : 
         while True:
             if queue:
@@ -177,13 +213,10 @@ def run_snesor(queue, errorDict):
 if __name__ == '__main__':
     # important: Do not use reloader because this will create two Flask instances.
     print("Flower-Pot-Server Runing...")
-    
-    # MultiProcessor간 변수 공유를 위한 Manager
-    # manager = multiprocessing.Manager()
+    motor5()
 
     # 명령 Queue
     queueList
-
     # Error Check용 Dict
     errorDict
 

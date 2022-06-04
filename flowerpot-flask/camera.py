@@ -10,7 +10,7 @@ def videoDetector():
             ret, video = cap.read()
             video = cv2.flip(video, 0)  # 좌우반전
             video = cv2.flip(video, 1)  # 상하반전
-            cv2.imwrite('test.jpg',video)
+            
             if ret:
                 video = cv2.resize(video, dsize=(400, 300), interpolation=cv2.INTER_AREA)
 
@@ -27,6 +27,7 @@ def videoDetector():
                 # print(textArr)
 
                 print("Text = " + str(textArr))
+                cv2.imwrite('test.jpg', img_result)
 
                 if cv2.waitKey(1) != -1:
                     break
