@@ -10,6 +10,12 @@ class CameraActivity : AppCompatActivity() {
 
     lateinit var binding: ActivityCameraBinding
 
+    override fun onStart() {
+        super.onStart()
+
+        getDatas()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -45,5 +51,12 @@ class CameraActivity : AppCompatActivity() {
         }
 
         setContentView(binding.root)
+    }
+
+    private fun getDatas() {
+        val flowerDataService = FlowerDataService()
+        // flowerDataService.setLookView(this)
+
+        flowerDataService.getDatas()
     }
 }
