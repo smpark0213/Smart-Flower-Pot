@@ -9,7 +9,7 @@ from flask_mqtt import Mqtt
 from gpiozero import Motor
 from flask_socketio import SocketIO
 
-eventlet.monkey_patch()
+#eventlet.monkey_patch()
 broker_ip = '127.0.0.1'
 mqtt_port = 1883
 app = Flask(__name__)
@@ -23,7 +23,7 @@ socketio = SocketIO(app)
 mqtt = Mqtt(app)
 
 topic = ['flowerpot1', 'flowerpot2', 'flowerpot3']
-flowerpot_data = {'flowerpot1': {}, 'flowerpot2': {}, 'flowerpot3': {}}
+flowerpot_data = [{'flowerpot1': {}}, {'flowerpot2': {}}, {'flowerpot3': {}}]
 
 ### flask-mqtt ###
 @mqtt.on_connect()
@@ -51,14 +51,14 @@ def update_flower_pots(inputTopic, moisture, light):
     global topic
     print(inputTopic)
     if(inputTopic == topic[0]):
-        flowerpot_data[topic[0]]['moisture'] = moisture
-        flowerpot_data[topic[0]]['light'] = light
+        flowerpot_data[0][topic[0]]['moisture'] = moisture
+        flowerpot_data[0][topic[0]]['light'] = light
     elif(inputTopic == topic[1]):
-        flowerpot_data[topic[1]]['moisture'] = moisture
-        flowerpot_data[topic[1]]['light'] = light
+        flowerpot_data[1][topic[1]]['moisture'] = moisture
+        flowerpot_data[1][topic[1]]['light'] = light
     elif(inputTopic == topic[2]):
-        flowerpot_data[topic[2]]['moisture'] = moisture
-        flowerpot_data[topic[2]]['light'] = light
+        flowerpot_data[2][topic[2]]['moisture'] = moisture
+        flowerpot_data[2][topic[2]]['light'] = light
     else:
         return 0
     print(flowerpot_data)
