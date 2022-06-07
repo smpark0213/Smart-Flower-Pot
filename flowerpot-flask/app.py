@@ -4,8 +4,6 @@ import multiprocessing
 import time
 from multiprocessing import Process
 from multiprocessing.dummy import Process
-from flask import Flask, jsonify
-from flask_mqtt import Mqtt
 from gpiozero import Motor
 from flask_socketio import SocketIO
 import cv2
@@ -20,13 +18,13 @@ import paho.mqtt.client as mqtt
 
 broker_ip = '127.0.0.1'
 mqtt_port = 1883
-app = Flask(__name__)
+# app = Flask(__name__)
 
-app.config['MQTT_BROKER_URL'] = broker_ip
-app.config['MQTT_BROKER_PORT'] = mqtt_port
-app.config['MQTT_REFRESH_TIME'] = 1.0  # refresh time in seconds
-socketio = SocketIO(app)
-mqtt = Mqtt(app)
+# app.config['MQTT_BROKER_URL'] = broker_ip
+# app.config['MQTT_BROKER_PORT'] = mqtt_port
+# app.config['MQTT_REFRESH_TIME'] = 1.0  # refresh time in seconds
+# socketio = SocketIO(app)
+# mqtt = Mqtt(app)
 
 topic = ['flowerpot1', 'flowerpot2', 'flowerpot3']
 flowerpot_data = [{'name': 'flowerpot1', 'moisture' : -1, 'light' : -1}, {'name':'flowerpot2', 'moisture' : -1, 'light' : -1}, {'name':'flowerpot3', 'moisture' : -1, 'light' : -1}]
@@ -116,19 +114,6 @@ def on_subscribe(client, userdata, mid, granted_qos):
 
 def on_message(client, userdata, msg):
     print(str(msg.payload.decode("utf-8")))
-
-### flask-mqtt ###
-@mqtt.on_connect()
-def handle_connect(client, userdata, flags, rc):
-    global topic
-    if(rc == 0):
-        for t in topic :
-            mqtt.subscribe(t)
-    else:
-        print("Bad connection Returned code = ", rc)
-
-@mqtt.on_message()
-def handle_mqtt_message(client, userdata, message):
     list=message.payload.decode().split()
     global flowerpot_data
     # Moisture <int> / Light <float>
@@ -136,7 +121,7 @@ def handle_mqtt_message(client, userdata, message):
     moisture = float(list[1])
     light = float(list[4])
     update_flower_pots(message.topic, moisture, light)
-
+    # check flower pot
 
 # flowerpot1 == 앞쪽
 # flowerpot2 == 뒤쪽
@@ -231,7 +216,7 @@ def run_snesor(queue, errorDict):
 if __name__ == '__main__':
     # important: Do not use reloader because this will create two Flask instances.
     print("Flower-Pot-Server Runing...")
-    client = mqtt.Client("server-mqtt")
+    client = mqtt.Client()
 
     client.on_connect = on_connect
     client.on_disconnect = on_disconnect
