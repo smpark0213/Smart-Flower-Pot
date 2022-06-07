@@ -40,7 +40,6 @@ def check_distance():
             time.sleep(0.00001)
             GPIO.output(trig, False)
 
-
             while GPIO.input(echo) == 0 :
                 pulse_start = time.time()
 
@@ -53,6 +52,7 @@ def check_distance():
             
             if distance <= 15.0:
                 print('detected')
+                break
     finally:
         GPIO.cleanup()
 
@@ -88,7 +88,7 @@ def check_flower_pots():
     global flowerpot_data
     global curr_plant
     moisture_threshold = 300 
-    light_threshold = 1000
+    light_threshold = 800
 
     moisutre_trigger = -1
     light_trigger = -1
@@ -139,14 +139,12 @@ def update_flower_pots(inputTopic, moisture, light):
         return 0
     print(flowerpot_data)
 
-
 def watering(speed=1):
     # 워터펌프 : motor5
     motor = Motor(forward=26, backward=21)
     motor.forward(speed)
     time.sleep(2.5)
     motor.stop()
-
 
 def light_on():
     print('on')
@@ -169,17 +167,23 @@ def move():
     if curr_plant == 0:
         for motor in motors:
             motor.forward()
-        time.sleep()
+
+        check_distance()
+        time.sleep(1)
+        
         for motor in motors:
-            motor.backward()
+            motor.stop()
 
     # flowerpot1 -> flowerpot2
     if curr_plant == 1:
         for motor in motors:
             motor.backward()
-        time.sleep()
+
+        check_distance()
+        time.sleep(1)
+        
         for motor in motors:
-            motor.forward()
+            motor.stop()
 
 if __name__ == '__main__':
     print("Flower-Pot-Server Runing...")
