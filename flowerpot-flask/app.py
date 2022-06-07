@@ -150,6 +150,7 @@ def light_on():
     return 0;
 
 def move():
+    global curr_plant
     # 바퀴 : motor1 ~ motor4
     motor1 = Motor(forward=17, backward=27)
     motor2 = Motor(forward=22, backward=23)
