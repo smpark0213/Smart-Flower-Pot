@@ -12,6 +12,7 @@ import cv2
 from pytesseract import image_to_string
 import pytesseract
 from PIL import Image
+import paho.mqtt.client as mqtt
 
 # mqtt_server
 # camera_server
@@ -98,6 +99,23 @@ def run_video(queue, errorDict):
     except Exception as e:
         errorDict['isError'] = True
         print('Error!', e)
+
+
+### mqtt-python ###
+def on_connect(client, userdata, flags, rc):
+    if rc == 0:
+        print("Connect ok!")
+    else:
+        print("Bad connection returned code = ", rc)
+
+def on_disconnect(client, userdata, flags, rc=0):
+    print(str(rc))
+
+def on_subscribe(client, userdata, mid, granted_qos):
+    print("subscritbe " + str(mid) + " " +str(granted_qos))
+
+def on_message(client, userdata, msg):
+    print(str(msg.payload.decode("utf-8")))
 
 ### flask-mqtt ###
 @mqtt.on_connect()
@@ -213,6 +231,18 @@ def run_snesor(queue, errorDict):
 if __name__ == '__main__':
     # important: Do not use reloader because this will create two Flask instances.
     print("Flower-Pot-Server Runing...")
+    client = mqtt.Client("server-mqtt")
+
+    client.on_connect = on_connect
+    client.on_disconnect = on_disconnect
+    client.on_subscribe = on_subscribe
+    client.on_message = on_message
+
+    client.connect(broker_ip, mqtt_port)
+    for t in topic :
+            client.subscribe(t)
+    client.loop_forever()
+
     motor5()
 
     # 명령 Queue
