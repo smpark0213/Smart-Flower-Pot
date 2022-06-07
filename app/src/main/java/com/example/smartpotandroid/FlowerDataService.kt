@@ -20,12 +20,6 @@ class FlowerDataService() {
                 if (response.isSuccessful && response.code() == 200) {
                     val flowerDataResponse: FlowerDataResponse = response.body()!!
 
-                    /*
-                    flower.light = flowerDataResponse.message[0].light
-                    flower.moisture = flowerDataResponse.message[0].moisture
-                    flower.name = flowerDataResponse.message[0].name
-                     */
-
                     flower = flowerDataResponse.message[0]
 
                     Log.d("flowerDataResponse", flower.toString())

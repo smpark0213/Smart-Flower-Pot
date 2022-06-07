@@ -22,27 +22,38 @@
 
     <ImageView
         android:id="@+id/main_logo"
-        android:layout_width="150dp"
+        android:layout_width="200dp"
         android:layout_height="0dp"
-        android:layout_weight="2"
+        android:layout_weight="3"
         android:layout_marginTop="20dp"
         android:text="LOGO"
         android:background="@drawable/logo"
         android:layout_gravity="center"/>
 
     <TextView
-        android:id="@+id/main_text"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="5"
-        android:text="
-                    SmartFlowerPot은
-                    automatic watering\n
-                    sunlight fill\n
-                    mobile monitoring\n
-                    ㄴ
-                    "
-        android:layout_marginTop="20dp"
+        android:layout_weight="1.5"
+        android:textSize="16sp"
+        android:textColor="@color/black"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
+        android:background="#DBF6D9"
+        android:fontFamily="@font/font1"
+        android:text="\n\nSmartFlowerPot은 화분을 키우는 사람들에게 편리함을 제공하기 위해 만들어진 어플리케이션입니다."
+        android:layout_marginTop="20dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2.5"
+        android:textSize="16sp"
+        android:textColor="@color/black"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
+        android:background="#DBF6D9"
+        android:fontFamily="@font/font1"
+        android:text="1) 식물의 수분에 따라 자동으로 물을 공급합니다.\n2) 식물이 받는 빛의 양에 따라 빛을 공급해줍니다.\n3) 실시간 모니터링 기능을 제공해 사용자가 실시간으로 화분의 상태를 확인할 수 있도록 돕는다."
         android:layout_marginBottom="20dp" />
 
     <Button
