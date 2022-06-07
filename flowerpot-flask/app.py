@@ -13,8 +13,10 @@ import time
 GPIO.setmode(GPIO.BCM)
 trig = 2
 echo = 3
+led_ctrl = 4
 GPIO.setup(trig, GPIO.OUT)
 GPIO.setup(echo, GPIO.IN)
+GPIO.setup(led_ctrl, GPIO.OUT)
 
 broker_ip = '127.0.0.1'
 mqtt_port = 1883
@@ -147,7 +149,13 @@ def watering(speed=1):
 
 
 def light_on():
-    return 0;
+    print('on')
+    GPIO.output(led_ctrl, True)
+    time.sleep(2)
+    print('off')
+    GPIO.output(led_ctrl, False)
+    time.sleep(2)
+    GPIO.cleanup()
 
 def move():
     global curr_plant
