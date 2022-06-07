@@ -1,40 +1,195 @@
 from distutils.util import run_2to3
-import threading
-import multiprocessing
+from pydoc import cli
 import time
-from multiprocessing import Process
-from multiprocessing.dummy import Process
 from gpiozero import Motor
-from flask_socketio import SocketIO
 import cv2
 from pytesseract import image_to_string
 import pytesseract
 from PIL import Image
 import paho.mqtt.client as mqtt
+import RPi.GPIO as GPIO
+import time 
 
-# mqtt_server
-# camera_server
-# motor_server
+GPIO.setmode(GPIO.BCM)
+trig = 2
+echo = 3
+GPIO.setup(trig, GPIO.OUT)
+GPIO.setup(echo, GPIO.IN)
 
 broker_ip = '127.0.0.1'
 mqtt_port = 1883
-# app = Flask(__name__)
+topic = ['flowerpot1', 'flowerpot2']
+flowerpot_data = [{'name': 'flowerpot1', 'moisture' : -1, 'light' : -1}, {'name':'flowerpot2', 'moisture' : -1, 'light' : -1}]
 
-# app.config['MQTT_BROKER_URL'] = broker_ip
-# app.config['MQTT_BROKER_PORT'] = mqtt_port
-# app.config['MQTT_REFRESH_TIME'] = 1.0  # refresh time in seconds
-# socketio = SocketIO(app)
-# mqtt = Mqtt(app)
-
-topic = ['flowerpot1', 'flowerpot2', 'flowerpot3']
-flowerpot_data = [{'name': 'flowerpot1', 'moisture' : -1, 'light' : -1}, {'name':'flowerpot2', 'moisture' : -1, 'light' : -1}, {'name':'flowerpot3', 'moisture' : -1, 'light' : -1}]
-queueList = []
-errorDict = {'isError': False}
 # 현재 화분
-curr_plant = None
+# 0(forward): flowerpot1, 1(backward): flowerpot2
+curr_plant = 0
 
 ### OCR ###
 cap = cv2.VideoCapture(-1)
+
+def check_distance():
+    try :
+        while True:
+            GPIO.output(trig, False)
+            time.sleep(0.5)
+
+            GPIO.output(trig, True)
+            time.sleep(0.00001)
+            GPIO.output(trig, False)
+
+
+            while GPIO.input(echo) == 0 :
+                pulse_start = time.time()
+
+            while GPIO.input(echo) == 1 :
+                pulse_end = time.time()
+
+            pulse_duration = pulse_end - pulse_start
+            distance = pulse_duration * 17000
+            distance = round(distance, 2)
+            
+            if distance <= 15.0:
+                print('detected')
+    finally:
+        GPIO.cleanup()
+
+### mqtt-python ###
+def on_connect(client, userdata, flags, rc):
+    if rc == 0:
+        print("Connect ok!")
+    else:
+        print("Bad connection returned code = ", rc)
+
+def on_disconnect(client, userdata, flags, rc=0):
+    print("Disconnectd! rc = " + str(rc))
+
+def on_subscribe(client, userdata, mid, granted_qos):
+    print("Subscritbe " + str(mid) + " " +str(granted_qos))
+
+def on_message(client, userdata, msg):
+    print(str(msg.payload.decode("utf-8")))
+    list= msg.payload.decode().split()
+    global flowerpot_data
+    # Moisture <int> / Light <float>
+    # 0         1   2   3       4
+    moisture = float(list[1])
+    light = float(list[4])
+    # update flower pots
+    update_flower_pots(msg.topic, moisture, light)
+    # check flower pots
+    check_flower_pots()
+
+# flowerpot1 == 앞쪽
+# flowerpot2 == 뒤쪽
+def check_flower_pots():
+    global flowerpot_data
+    global curr_plant
+    moisture_threshold = 300 
+    light_threshold = 1000
+
+    moisutre_trigger = -1
+    light_trigger = -1
+
+    # 0,  수분 체크
+    if flowerpot_data[0]['moisture'] < moisture_threshold:
+        moisutre_trigger = 0
+        if curr_plant != moisutre_trigger:
+            move()
+        watering()
+        curr_plant = moisutre_trigger
+
+    # 1,  수분 체크
+    if flowerpot_data[1]['moisture'] < moisture_threshold:
+        moisutre_trigger = 1
+        if curr_plant != moisutre_trigger:
+            move()
+        watering()
+        curr_plant = moisutre_trigger
+
+    # 0,  조도 low 체크
+        if flowerpot_data[0]['light'] < light_threshold:
+            light_trigger = 0
+            if curr_plant != light_trigger:
+                move()
+            light_on()
+            curr_plant = light_trigger
+
+    # 1,  조도 low 체크
+    if flowerpot_data[1]['light'] < light_threshold:
+        light_trigger = 1
+        if curr_plant != light_trigger:
+            move()
+        light_on()
+        curr_plant = light_trigger
+
+def update_flower_pots(inputTopic, moisture, light):
+    global flowerpot_data
+    global topic
+    if(inputTopic == topic[0]):
+        flowerpot_data[0]['moisture'] = moisture
+        flowerpot_data[0]['light'] = light
+    elif(inputTopic == topic[1]):
+        flowerpot_data[1]['moisture'] = moisture
+        flowerpot_data[1]['light'] = light
+    else:
+        print("update flowerpots error")
+        return 0
+    print(flowerpot_data)
+
+
+def watering(speed=1):
+    # 워터펌프 : motor5
+    motor = Motor(forward=26, backward=21)
+    motor.forward(speed)
+    time.sleep(2.5)
+    motor.stop()
+
+
+def light_on():
+    return 0;
+
+def move():
+    # 바퀴 : motor1 ~ motor4
+    motor1 = Motor(forward=17, backward=27)
+    motor2 = Motor(forward=22, backward=23)
+    motor3 = Motor(forward=5, backward=6)
+    motor4 = Motor(forward=13, backward=19)
+    motors = [motor1, motor2, motor3, motor4]
+    # flowerpot1 -> flowerpot2
+    if curr_plant == 0:
+        for motor in motors:
+            motor.forward()
+        time.sleep()
+        for motor in motors:
+            motor.backward()
+
+    # flowerpot1 -> flowerpot2
+    if curr_plant == 1:
+        for motor in motors:
+            motor.backward()
+        time.sleep()
+        for motor in motors:
+            motor.forward()
+
+if __name__ == '__main__':
+    print("Flower-Pot-Server Runing...")
+    client = mqtt.Client()
+
+    client.on_connect = on_connect
+    client.on_disconnect = on_disconnect
+    client.on_subscribe = on_subscribe
+    client.on_message = on_message
+
+    # run_video = threading.Thread(target=run_video, args=(queueList, errorDict))
+    # run_video.start()
+    # run_video.join()
+
+    client.connect(broker_ip, mqtt_port)
+    client.subscribe(topic[0])
+    client.subscribe(topic[1])
+
+    client.loop_forever()
 
 # 앞 화분 (flowerpot1)
 def is_plant1(text):
@@ -45,7 +200,6 @@ def is_plant1(text):
     else:
         return 0
 
-
 # 뒤 화분(flowerpot2)
 def is_plant2(text):
     plant1 = 'plantA'
@@ -54,7 +208,6 @@ def is_plant2(text):
         return 1
     else:
         return 0
-    
 
 def video_detector():
     if cap.isOpened():
@@ -97,149 +250,3 @@ def run_video(queue, errorDict):
     except Exception as e:
         errorDict['isError'] = True
         print('Error!', e)
-
-
-### mqtt-python ###
-def on_connect(client, userdata, flags, rc):
-    if rc == 0:
-        print("Connect ok!")
-    else:
-        print("Bad connection returned code = ", rc)
-
-def on_disconnect(client, userdata, flags, rc=0):
-    print(str(rc))
-
-def on_subscribe(client, userdata, mid, granted_qos):
-    print("subscritbe " + str(mid) + " " +str(granted_qos))
-
-def on_message(client, userdata, msg):
-    print(str(msg.payload.decode("utf-8")))
-    list=message.payload.decode().split()
-    global flowerpot_data
-    # Moisture <int> / Light <float>
-    # 0         1   2   3       4
-    moisture = float(list[1])
-    light = float(list[4])
-    update_flower_pots(message.topic, moisture, light)
-    # check flower pot
-
-# flowerpot1 == 앞쪽
-# flowerpot2 == 뒤쪽
-
-def update_flower_pots(inputTopic, moisture, light):
-    global flowerpot_data
-    global topic
-    print(inputTopic)
-    if(inputTopic == topic[0]):
-        flowerpot_data[0]['moisture'] = moisture
-        flowerpot_data[0]['light'] = light
-    elif(inputTopic == topic[1]):
-        flowerpot_data[1]['moisture'] = moisture
-        flowerpot_data[1]['light'] = light
-    elif(inputTopic == topic[2]):
-        flowerpot_data[2]['moisture'] = moisture
-        flowerpot_data[2]['light'] = light
-    else:
-        return 0
-    print(flowerpot_data)
-
-
-def check_flowerpot():
-    # moisture validation
-    # light validation
-    return 0
-
-
-def motor5():
-    # 워터펌프 : motor5
-    motor5 = Motor(forward=26, backward=21)
-    motor5.forward(1)
-    time.sleep(2.5)
-    motor5.stop()
-
-def run_snesor(queue, errorDict):
-    # 바퀴 : motor1 ~ motor4
-    motor1 = Motor(forward=17, backward=27)
-    motor2 = Motor(forward=22, backward=23)
-    motor3 = Motor(forward=5, backward=6)
-    motor4 = Motor(forward=13, backward=19)
-
-    # # 워터펌프 : motor5
-    # motor5 = Motor(forward=26)
-    # motor5.forward(0.5)
-    # time.sleep(5)
-    # motor5.stop()
-    try : 
-        while True:
-            if queue:
-                # 일반 명령어 파싱
-                cmd = list(map(int, queue.pop(0).split(';')))
-                print(cmd)
-
-                if cmd[0] == 1:
-                    try:
-                        print('High')
-                        motor1.forward()
-                        motor2.forward()
-                        motor3.forward()
-                        motor4.forward()
-                        time.sleep(5)
-                    finally:
-                        motor1.stop()
-                        motor2.stop()   
-                        motor3.stop()
-                        motor4.stop()
-                        queue[:] = []
-                    
-
-                if cmd[0] == 2:
-                    try:
-                        print('LOW')
-                        motor1.backward()
-                        motor2.backward()
-                        motor3.backward()
-                        motor4.backward()
-                        time.sleep(5)
-                    finally:
-                        motor1.stop()
-                        motor2.stop()   
-                        motor3.stop()
-                        motor4.stop()
-                        queue[:] = []
-                    
-    
-    except Exception as e:
-        errorDict['isError'] = True
-        print('Error!', e)
-
-
-if __name__ == '__main__':
-    # important: Do not use reloader because this will create two Flask instances.
-    print("Flower-Pot-Server Runing...")
-    client = mqtt.Client()
-
-    client.on_connect = on_connect
-    client.on_disconnect = on_disconnect
-    client.on_subscribe = on_subscribe
-    client.on_message = on_message
-
-    client.connect(broker_ip, mqtt_port)
-    for t in topic :
-            client.subscribe(t)
-    client.loop_forever()
-
-    motor5()
-
-    # 명령 Queue
-    queueList
-    # Error Check용 Dict
-    errorDict
-
-    run_snesor = threading.Thread(target=run_snesor, args=(queueList, errorDict))
-    run_video = threading.Thread(target=run_video, args=(queueList, errorDict))
-
-    run_video.start()
-    run_snesor.start()
-
-    run_video.join()
-    run_snesor.join()
