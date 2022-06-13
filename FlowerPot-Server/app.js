@@ -16,11 +16,17 @@ const water_time = 43200000;
 // 태양빛 주기
 const light_time = 3600000;
 
+// OCR 대기 주기
+const ocr_time = 10000;
+
 // 마지막 물 준 시간
 const water_lasttime = [0, 0, 0];
 
 // 마지막 태양 시간
 const light_lasttime = [0, 0, 0];
+
+// 마지막 OCR 요청 시간
+let ocr_lasttime = 0;
 
 // 현재 식물
 let curr_plant = -1;
@@ -71,6 +77,9 @@ const mqtt_on_message = async (topic, message, packet) => {
         } else if (lowerText.includes('plantc')) {
             curr_plant = 2;
         }
+
+        // OCR 요청시간 초기화
+        ocr_lasttime = -1;
     }
 };
 
@@ -116,8 +125,8 @@ function main() {
     mqtt_client.subscribe(mqtt_topic, { qos: 1 });
 
     // 5분 후 Firebase upate
-    setTimeout(() => {
-        firebase.updateFirebaseFlowerPot(flowerpot_data);
+    setTimeout(async () => {
+        await firebase.updateFirebaseFlowerPot(flowerpot_data);
     }, 1000 * 60 * 5)
 }
 
@@ -130,6 +139,10 @@ async function check_status() {
         if (moisture0 < moisture_threshold) {
             if (current_time - water_lasttime[0] >= water_time) {
                 while (curr_plant !== 0) {
+                    // OCR 요청 시간이 일정 시간 이내라면 넘어감
+                    if (current_time - ocr_lasttime <= ocr_time) {
+                        continue
+                    }
                     await move(0);
                 }
 
@@ -141,6 +154,10 @@ async function check_status() {
         if (light0 < light_threshold) {
             if (current_time - light_lasttime[0] >= light_time) {
                 while (curr_plant !== 0) {
+                    // OCR 요청 시간이 일정 시간 이내라면 넘어감
+                    if (current_time - ocr_lasttime <= ocr_time) {
+                        continue
+                    }
                     await move(0);
                 }
 
@@ -157,6 +174,10 @@ async function check_status() {
         if (moisture1 < moisture_threshold) {
             if (current_time - water_lasttime[1] >= water_time) {
                 while (curr_plant !== 1) {
+                    // OCR 요청 시간이 일정 시간 이내라면 넘어감
+                    if (current_time - ocr_lasttime <= ocr_time) {
+                        continue
+                    }
                     await move(1);
                 }
 
@@ -168,6 +189,10 @@ async function check_status() {
         if (light1 < light_threshold) {
             if (current_time - light_lasttime[1] >= light_time) {
                 while (curr_plant !== 1) {
+                    // OCR 요청 시간이 일정 시간 이내라면 넘어감
+                    if (current_time - ocr_lasttime <= ocr_time) {
+                        continue
+                    }
                     await move(1);
                 }
 
@@ -184,6 +209,10 @@ async function check_status() {
         if (moisture2 < moisture_threshold) {
             if (current_time - water_lasttime[2] >= water_time) {
                 while (curr_plant !== 2) {
+                    // OCR 요청 시간이 일정 시간 이내라면 넘어감
+                    if (current_time - ocr_lasttime <= ocr_time) {
+                        continue
+                    }
                     await move(2);
                 }
 
@@ -195,6 +224,10 @@ async function check_status() {
         if (light2 < light_threshold) {
             if (current_time - light_lasttime[2] >= light_time) {
                 while (curr_plant !== 2) {
+                    // OCR 요청 시간이 일정 시간 이내라면 넘어감
+                    if (current_time - ocr_lasttime <= ocr_time) {
+                        continue
+                    }
                     await move(2);
                 }
 
@@ -207,21 +240,21 @@ async function check_status() {
 
 // 모터
 async function move(target_plant) {
-    await control_light(false)
-    const direction = check_move_direction(curr_plant, target_plant);
+    // 처음 이동이거나, 이전 OCR 대기 시간을 넘었다면
+    if (ocr_lasttime === -1 || microtime.nowDouble() - ocr_lasttime >= ocr_time) {
+        await control_light(false)
+        const direction = check_move_direction(curr_plant, target_plant);
 
-    if (direction === 1) {
-        await gpio.runMotor(motor1Forward, motor1Pwm, 60);
-        await gpio.runMotor(motor2Forward, motor2Pwm, 60);
+        if (direction === 1) {
+            await gpio.runMotor(motor1Forward, motor1Pwm, 60);
+            await gpio.runMotor(motor2Forward, motor2Pwm, 60);
+        } else if (direction === -1) {
+            await gpio.runMotor(motor1Backward, motor1Pwm, 60);
+            await gpio.runMotor(motor2Backward, motor2Pwm, 60);
+        } else if (direction === 0)
+            return;
+        await gpio.checkDistanceByUltrasonic(trig, echo, 15.0, callback_motor);
     }
-    else if (direction === -1) {
-        await gpio.runMotor(motor1Backward, motor1Pwm, 60);
-        await gpio.runMotor(motor2Backward, motor2Pwm, 60);
-    }
-    else if (direction === 0)
-        return;
-
-    await gpio.checkDistanceByUltrasonic(trig, echo, 15.0, callback_motor);
 }
 
 // 워터펌프
@@ -240,6 +273,7 @@ async function callback_motor() {
 
     // OCR 판독 요청
     mqtt_client.publish('ocrrequest', 'true', { qos: 2 })
+    ocr_lasttime = microtime.nowDouble();
 }
 
 // LED 제어
