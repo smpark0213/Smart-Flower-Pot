@@ -148,6 +148,7 @@ async function check_status() {
 
                 water_lasttime[0] = current_time;
                 await run_waterpump();
+                return;
             }
         }
 
@@ -163,6 +164,7 @@ async function check_status() {
 
                 light_lasttime[0] = current_time;
                 await control_light(true);
+                return;
             }
         }
     }
@@ -183,6 +185,7 @@ async function check_status() {
 
                 water_lasttime[1] = current_time;
                 await run_waterpump();
+                return;
             }
         }
 
@@ -198,6 +201,7 @@ async function check_status() {
 
                 light_lasttime[1] = current_time;
                 await control_light(true);
+                return;
             }
         }
     }
@@ -218,6 +222,7 @@ async function check_status() {
 
                 water_lasttime[1] = current_time;
                 await run_waterpump();
+                return;
             }
         }
 
@@ -233,6 +238,7 @@ async function check_status() {
 
                 light_lasttime[2] = current_time;
                 await control_light(true);
+                return;
             }
         }
     }
