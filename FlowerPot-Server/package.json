@@ -9,8 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "firebase-admin": "^10.3.0",
     "microtime": "^3.1.0",
     "mqtt": "^4.3.7",
-    "pigpio": "^3.3.1"
+    "pigpio": "^3.3.1",
+    "tesseract.js": "^2.1.5"
   }
 }

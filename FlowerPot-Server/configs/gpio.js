@@ -1,4 +1,4 @@
-const {sleep} = require("./utils");
+const { sleep } = require("./utils");
 const microtime = require("microtime");
 
 const HIGH = 1;
@@ -12,10 +12,11 @@ const LOW = 0;
  * @return {boolean}
  */
 async function runMotor(motorGpio, pwmGpio, pwmValue) {
+    console.log('run');
     try {
         if (0 < pwmValue && pwmValue <= 255) {
-            motorGpio.digitalWrite(HIGH);
-            pwmGpio.pwmWrite(pwmValue)
+            await motorGpio.digitalWrite(HIGH);
+            await pwmGpio.pwmWrite(pwmValue)
             return true;
         }
         else {
@@ -36,8 +37,8 @@ async function runMotor(motorGpio, pwmGpio, pwmValue) {
  */
 async function stopMotor(motorGpio, pwmGpio) {
     try {
-        motorGpio.digitalWrite(LOW);
-        pwmGpio.pwmWrite(0)
+        await motorGpio.digitalWrite(LOW);
+        await pwmGpio.pwmWrite(0)
         return true;
     }
     catch (e) {
@@ -108,6 +109,7 @@ async function checkDistanceByUltrasonic(trigGpio, echoGpio, distance, callback)
         let pulse_distance = pulse_duration * 17000;
         pulse_distance = parseFloat(pulse_distance.toFixed(2));
 
+        console.log(pulse_distance);
         if (pulse_distance <= distance) {
             callback();
             break
