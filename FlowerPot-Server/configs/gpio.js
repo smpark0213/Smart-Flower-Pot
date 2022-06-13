@@ -9,7 +9,7 @@ const LOW = 0;
  * @param motorGpio Motor Gpio
  * @param pwmGpio Motor PWM Control Gpio
  * @param pwmValue PWM Value
- * @return {boolean}
+ * @return {Promise<void>}
  */
 async function runMotor(motorGpio, pwmGpio, pwmValue) {
     console.log('run');
@@ -17,15 +17,10 @@ async function runMotor(motorGpio, pwmGpio, pwmValue) {
         if (0 < pwmValue && pwmValue <= 255) {
             await motorGpio.digitalWrite(HIGH);
             await pwmGpio.pwmWrite(pwmValue)
-            return true;
-        }
-        else {
-            return false;
         }
     }
     catch (e) {
         console.error("Error!", e);
-        return false;
     }
 }
 
@@ -33,49 +28,43 @@ async function runMotor(motorGpio, pwmGpio, pwmValue) {
  * 모터 정지
  * @param motorGpio Motor Gpio
  * @param pwmGpio Motor PWM Control Gpio
- * @return {boolean}
+ * @return {Promise<void>}
  */
 async function stopMotor(motorGpio, pwmGpio) {
     try {
         await motorGpio.digitalWrite(LOW);
         await pwmGpio.pwmWrite(0)
-        return true;
     }
     catch (e) {
         console.error("Error!", e);
-        return false;
     }
 }
 
 /**
  * HIGH 보내기
  * @param gpio
- * @return {boolean}
+ * @return {Promise<void>}
  */
 async function sendHigh(gpio) {
     try {
         gpio.digitalWrite(HIGH);
-        return true;
     }
     catch (e) {
         console.error("Error!", e);
-        return false;
     }
 }
 
 /**
  * LOW 보내기
  * @param gpio
- * @return {boolean}
+ * @return {Promise<void>}
  */
 async function sendLow(gpio) {
     try {
         gpio.digitalWrite(LOW);
-        return true;
     }
     catch (e) {
         console.error("Error!", e);
-        return false;
     }
 }
 
