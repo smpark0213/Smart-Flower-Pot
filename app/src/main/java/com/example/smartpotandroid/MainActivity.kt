@@ -1,10 +1,7 @@
 package com.example.smartpotandroid
 
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
 import com.example.smartpotandroid.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -16,10 +13,45 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
 
-        binding.mainCameraBtn.setOnClickListener {
+        /* binding.mainCameraBtn.setOnClickListener {
             startActivity(Intent(this, CameraActivity::class.java))
-        }
+            // startActivity(Intent(this, TestActivity::class.java))
+        }*/
+
+        initBottomNavigation()
 
         setContentView(binding.root)
+    }
+
+    private fun initBottomNavigation() {
+
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.main_frame, HomeFragment())
+            .commitAllowingStateLoss()
+
+        binding.mainBnv.setOnNavigationItemSelectedListener setOnItemSelectedListener@{ item ->
+            when (item.itemId) {
+                R.id.home -> {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.main_frame, HomeFragment())
+                        .commitAllowingStateLoss()
+                    return@setOnItemSelectedListener true
+                }
+
+                R.id.camera -> {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.main_frame, CameraFragment())
+                        .commitAllowingStateLoss()
+                    return@setOnItemSelectedListener true
+                }
+                R.id.plant -> {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.main_frame, PlantFragment())
+                        .commitAllowingStateLoss()
+                    return@setOnItemSelectedListener true
+                }
+            }
+            false
+        }
     }
 }
