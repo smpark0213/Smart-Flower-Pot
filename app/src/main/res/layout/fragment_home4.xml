@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background2"
+    tools:context=".MainActivity"
+    android:orientation="vertical"
+    android:padding="20dp" >
+
+    <TextView
+        android:id="@+id/main_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="'' CatchPot ''"
+        android:textColor="@color/black"
+        android:fontFamily="@font/font7"
+        android:textSize="45dp"
+        android:gravity="center"
+        android:layout_marginTop="30dp"
+        android:layout_gravity="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!--
+    <ImageView
+        android:id="@+id/main_logo"
+        android:layout_width="250dp"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="40dp"
+        android:text="LOGO"
+        android:background="@drawable/logo"
+        android:layout_gravity="center"/> -->
+
+    <TextView
+        android:id="@+id/text1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="17sp"
+        android:textColor="@color/black"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
+        android:layout_marginTop="50dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:gravity="center"
+        android:fontFamily="@font/font5"
+        android:text="''CatchPot'' 은 화분을 키우는 사람들에게 편리함을\n제공하기 위해 만들어진 어플리케이션입니다."
+        app:layout_constraintTop_toBottomOf="@id/main_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/text2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:textColor="@color/black"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
+        android:layout_marginTop="50dp"
+        android:gravity="center_vertical"
+        android:fontFamily="@font/font5"
+        android:text="1) 식물의 흙 습도에 따라 물을 공급합니다.\n2) 식물이 받는 빛의 양에 따라 빛을 공급합니다.\n3) 실시간 모니터링 기능을 제공해 사용자가\n    실시간으로 화분의 상태를 확인할 수 있도록\n    돕습니다."
+        app:layout_constraintTop_toBottomOf="@+id/text1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+    <!--android:background="#DBF6D9"-->
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -13,11 +13,6 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
 
-        /* binding.mainCameraBtn.setOnClickListener {
-            startActivity(Intent(this, CameraActivity::class.java))
-            // startActivity(Intent(this, TestActivity::class.java))
-        }*/
-
         initBottomNavigation()
 
         setContentView(binding.root)

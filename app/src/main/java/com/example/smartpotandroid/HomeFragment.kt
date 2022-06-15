@@ -18,6 +18,21 @@ class HomeFragment : Fragment() {
     ): View? {
         binding = FragmentHomeBinding.inflate(inflater, container, false)
 
+        binding.homeWater.setOnClickListener {
+            (context as MainActivity).supportFragmentManager.beginTransaction()
+                .replace(R.id.main_frame, PlantFragment()).commitAllowingStateLoss()
+        }
+
+        binding.homeLight.setOnClickListener {
+            (context as MainActivity).supportFragmentManager.beginTransaction()
+                .replace(R.id.main_frame, PlantFragment()).commitAllowingStateLoss()
+        }
+
+        binding.homeCamera.setOnClickListener {
+            (context as MainActivity).supportFragmentManager.beginTransaction()
+                .replace(R.id.main_frame, CameraFragment()).commitAllowingStateLoss()
+        }
+
         return binding.root
     }
 }
