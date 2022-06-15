@@ -15,7 +15,7 @@ async function runMotor(motorGpio, pwmGpio, pwmValue) {
     console.log('run');
     try {
         if (0 < pwmValue && pwmValue <= 255) {
-            await motorGpio.digitalWrite(HIGH);
+            await motorGpio.pwmWrite(pwmValue);
             await pwmGpio.pwmWrite(pwmValue)
         }
     }
@@ -31,6 +31,7 @@ async function runMotor(motorGpio, pwmGpio, pwmValue) {
  * @return {Promise<void>}
  */
 async function stopMotor(motorGpio, pwmGpio) {
+    console.log('stop');
     try {
         await motorGpio.digitalWrite(LOW);
         await pwmGpio.pwmWrite(0)
@@ -47,7 +48,7 @@ async function stopMotor(motorGpio, pwmGpio) {
  */
 async function sendHigh(gpio) {
     try {
-        gpio.digitalWrite(HIGH);
+        await gpio.digitalWrite(HIGH);
     }
     catch (e) {
         console.error("Error!", e);
@@ -61,7 +62,7 @@ async function sendHigh(gpio) {
  */
 async function sendLow(gpio) {
     try {
-        gpio.digitalWrite(LOW);
+        await gpio.digitalWrite(LOW);
     }
     catch (e) {
         console.error("Error!", e);
@@ -82,7 +83,7 @@ async function checkDistanceByUltrasonic(trigGpio, echoGpio, distance, callback)
         let pulse_end = -1;
 
         trigGpio.digitalWrite(LOW);
-        await sleep(500);
+        await sleep(300);
 
         trigGpio.digitalWrite(HIGH);
         await sleep(0.01);

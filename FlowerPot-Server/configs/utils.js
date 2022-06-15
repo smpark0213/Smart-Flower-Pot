@@ -21,6 +21,9 @@ function check_move_direction(curr_plant, target_plant) {
     else if (curr_plant === 2) {
         return -1;
     }
+    else {
+        return 1;
+    }
 }
 
 
