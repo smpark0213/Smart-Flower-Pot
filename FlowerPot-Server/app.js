@@ -9,14 +9,14 @@ const { sleep, check_move_direction } = require('./configs/utils');
 
 // Threshold
 const moisture_threshold = 300
-const light_threshold = 500
+const light_threshold = 300
 const ocrtime_threshold = 10000
 
 // 물 줄 주기
-const water_time = 43200000;
+const water_time = 86400;
 
 // 태양빛 주기
-const light_time = 3600000;
+const light_time = 30;
 
 // 체크 주기
 const check_time = 300000;
@@ -166,6 +166,7 @@ async function check_status() {
                 return;
             }
         } else if (light[0] < light_threshold) {
+            console.log(current_time - light_lasttime[0]);
             if (current_time - light_lasttime[0] >= light_time) {
                 console.log('Plant 0 Light');
                 if (curr_plant !== 0) {
@@ -239,7 +240,7 @@ async function check_status() {
             }
         } else if (light[2] < light_threshold) {
             if (current_time - light_lasttime[2] >= light_time) {
-                console.log('Plant 2 Water');
+                console.log('Plant 2 Light');
                 if (curr_plant !== 2) {
                     lastWantedPlant = 2;
                     lastCommand = 1;
@@ -270,20 +271,20 @@ async function move(target_plant) {
     const direction = check_move_direction(curr_plant, target_plant);
 
     if (direction === -1) {
-        gpio.runMotor(motor1Forward, motor1Pwm, 60);
-        gpio.runMotor(motor2Forward, motor2Pwm, 60);
+        gpio.runMotor(motor1Forward, motor1Pwm, 63);
+        gpio.runMotor(motor2Forward, motor2Pwm, 63);
     } else if (direction === 1) {
-        gpio.runMotor(motor1Backward, motor1Pwm, 60);
-        gpio.runMotor(motor2Backward, motor2Pwm, 60);
+        gpio.runMotor(motor1Backward, motor1Pwm, 63);
+        gpio.runMotor(motor2Backward, motor2Pwm, 63);
     } else if (direction === 0) {
         isMoving = false;
         return;
     }
 
 
-    await sleep(1000);
+    await sleep(1500);
 
-    await gpio.checkDistanceByUltrasonic(trig, echo, 9.5, async function () {
+    await gpio.checkDistanceByUltrasonic(trig, echo, 9.8, async function () {
         // 모터 정지
         stop_motor();
         isMoving = false;
@@ -303,12 +304,12 @@ async function detect_callback() {
         // 물 
         if (lastCommand === 0) {
             water_lasttime[lastWantedPlant] = current_time;
-            run_waterpump();
+            await run_waterpump();
         }
         // 불
         else if (lastCommand === 1) {
             light_lasttime[lastWantedPlant] = current_time;
-            control_light(true);
+            await control_light(true);
         }
 
         lastWantedPlant = -1;
@@ -323,10 +324,10 @@ async function detect_callback() {
 // 워터펌프
 async function run_waterpump() {
     console.log('run water motor');
-    gpio.runMotor(waterMotor, waterMotorPwm, 60);
+    gpio.runMotor(waterMotor, waterMotorPwm, 150);
 
     console.log('sleep water motor')
-    await sleep(2000);
+    await sleep(1100);
 
     console.log('stop water motor')
     gpio.stopMotor(waterMotor, waterMotorPwm);
@@ -369,7 +370,8 @@ process.on('SIGINT', async function () {
 // 5분 간격으로 조도 / 습도 확인
 setInterval(async function () {
     console.log(`cmd last finished : ${isLastCmdFinished} / ismoving : ${isMoving}`);
-
+    console.log(light_lasttime);
+    console.log(water_lasttime);
     // 마지막 명령이 처리가 끝났으며, 움직이는 상태가 아닌 경우
     if (isLastCmdFinished && !isMoving) {
         // 상태 확인 시작
@@ -379,7 +381,8 @@ setInterval(async function () {
     else {
         console.log("not finished - ismoving");
     }
-}, 30000);
+}, 5000);
+
 
 // 5분 간격으로 Firebase Update
 setInterval(async () => {
