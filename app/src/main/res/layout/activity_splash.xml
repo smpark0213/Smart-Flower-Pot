@@ -25,7 +25,7 @@
             android:id="@+id/splash_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Smart Flower Pot"
+            android:text="CatchPot"
             android:textColor="@color/black"
             android:fontFamily="@font/font5"
             android:textSize="30dp"

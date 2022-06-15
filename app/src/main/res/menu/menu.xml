@@ -4,18 +4,18 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <item
+        android:id="@+id/camera"
+        android:icon="@drawable/ic_camera"
+        android:title="Camera"
+        app:showAsAction="always"/>
+
+    <item
         android:id="@+id/home"
         android:icon="@drawable/ic_home"
         app:showAsAction="always"
         android:enabled="true"
         android:title="Home"
         tools:ignore="AlwaysShowAction" />
-
-    <item
-        android:id="@+id/camera"
-        android:icon="@drawable/ic_camera"
-        android:title="Camera"
-        app:showAsAction="always"/>
 
     <item
         android:id="@+id/plant"

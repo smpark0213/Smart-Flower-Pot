@@ -23,15 +23,19 @@
         <entry key="..\:/Users/jimin/git/Smart-Flower-Pot/app/src/main/res/drawable/round_border.xml" value="0.108" />
         <entry key="..\:/Users/jimin/git/Smart-Flower-Pot/app/src/main/res/drawable/round_border2.xml" value="0.1225" />
         <entry key="..\:/Users/jimin/git/Smart-Flower-Pot/app/src/main/res/drawable/round_border3.xml" value="0.1225" />
+        <entry key="..\:/Users/jimin/git/Smart-Flower-Pot/app/src/main/res/drawable/round_button.xml" value="0.1295" />
         <entry key="..\:/Users/jimin/git/Smart-Flower-Pot/app/src/main/res/drawable/text_border.xml" value="0.167" />
         <entry key="..\:/Users/jimin/git/Smart-Flower-Pot/app/src/main/res/layout/activity_camera.xml" value="0.16666666666666666" />
-        <entry key="..\:/Users/jimin/git/Smart-Flower-Pot/app/src/main/res/layout/activity_main.xml" value="0.5" />
+        <entry key="..\:/Users/jimin/git/Smart-Flower-Pot/app/src/main/res/layout/activity_main.xml" value="0.22" />
         <entry key="..\:/Users/jimin/git/Smart-Flower-Pot/app/src/main/res/layout/activity_pot_list.xml" value="0.175" />
         <entry key="..\:/Users/jimin/git/Smart-Flower-Pot/app/src/main/res/layout/activity_splash.xml" value="0.175" />
         <entry key="..\:/Users/jimin/git/Smart-Flower-Pot/app/src/main/res/layout/activity_test.xml" value="0.1" />
         <entry key="..\:/Users/jimin/git/Smart-Flower-Pot/app/src/main/res/layout/fragment_camera.xml" value="0.16666666666666666" />
-        <entry key="..\:/Users/jimin/git/Smart-Flower-Pot/app/src/main/res/layout/fragment_home.xml" value="0.175" />
-        <entry key="..\:/Users/jimin/git/Smart-Flower-Pot/app/src/main/res/layout/fragment_plant.xml" value="0.3333333333333333" />
+        <entry key="..\:/Users/jimin/git/Smart-Flower-Pot/app/src/main/res/layout/fragment_home.xml" value="0.16666666666666666" />
+        <entry key="..\:/Users/jimin/git/Smart-Flower-Pot/app/src/main/res/layout/fragment_home2.xml" value="0.175" />
+        <entry key="..\:/Users/jimin/git/Smart-Flower-Pot/app/src/main/res/layout/fragment_home3.xml" value="0.175" />
+        <entry key="..\:/Users/jimin/git/Smart-Flower-Pot/app/src/main/res/layout/fragment_home4.xml" value="0.175" />
+        <entry key="..\:/Users/jimin/git/Smart-Flower-Pot/app/src/main/res/layout/fragment_plant.xml" value="0.22" />
         <entry key="..\:/Users/jimin/git/Smart-Flower-Pot/app/src/main/res/layout/item_po2.xml" value="0.1" />
         <entry key="..\:/Users/jimin/git/Smart-Flower-Pot/app/src/main/res/layout/item_pot.xml" value="0.3333333333333333" />
         <entry key="..\:/Users/jimin/git/Smart-Flower-Pot/app/src/main/res/layout/item_pot2.xml" value="0.3333333333333333" />
