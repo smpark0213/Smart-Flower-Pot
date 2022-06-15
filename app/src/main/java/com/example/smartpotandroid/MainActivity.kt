@@ -13,6 +13,8 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
 
+        binding.mainBnv.selectedItemId = R.id.home;
+
         initBottomNavigation()
 
         setContentView(binding.root)
@@ -26,16 +28,15 @@ class MainActivity : AppCompatActivity() {
 
         binding.mainBnv.setOnNavigationItemSelectedListener setOnItemSelectedListener@{ item ->
             when (item.itemId) {
-                R.id.home -> {
-                    supportFragmentManager.beginTransaction()
-                        .replace(R.id.main_frame, HomeFragment())
-                        .commitAllowingStateLoss()
-                    return@setOnItemSelectedListener true
-                }
-
                 R.id.camera -> {
                     supportFragmentManager.beginTransaction()
                         .replace(R.id.main_frame, CameraFragment())
+                        .commitAllowingStateLoss()
+                    return@setOnItemSelectedListener true
+                }
+                R.id.home -> {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.main_frame, HomeFragment())
                         .commitAllowingStateLoss()
                     return@setOnItemSelectedListener true
                 }

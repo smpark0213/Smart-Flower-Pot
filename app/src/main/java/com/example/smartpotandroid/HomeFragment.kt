@@ -21,6 +21,7 @@ class HomeFragment : Fragment() {
         binding.homeWater.setOnClickListener {
             (context as MainActivity).supportFragmentManager.beginTransaction()
                 .replace(R.id.main_frame, PlantFragment()).commitAllowingStateLoss()
+            // bottomNavigationView.setSelectedItemId(R.id.home);
         }
 
         binding.homeLight.setOnClickListener {
