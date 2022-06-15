@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "190429770409",
+    "project_id": "smart-flowerpot-3d998",
+    "storage_bucket": "smart-flowerpot-3d998.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:190429770409:android:1040f0a8783ca188636fb8",
+        "android_client_info": {
+          "package_name": "com.example.smartpotandroid"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "190429770409-hdjj8is7qpbt62849ibapa5rvfpubq8m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8MnOG-WAjxRyH2CuScL3WZGnVS_yCE8s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "190429770409-hdjj8is7qpbt62849ibapa5rvfpubq8m.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
