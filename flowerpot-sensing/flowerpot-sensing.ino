@@ -19,7 +19,7 @@ WiFiClient espClient;
 unsigned long lastWiFiCheck = 0;
 
 // Mqtt
-const char* mqttServer = "172.16.239.43";
+const char* mqttServer = "arkpi.local";
 const int mqttPort = 1883;
 const char* mqttClientName = "SmartFlowerpot1";
 unsigned long lastSendTime = 0;
